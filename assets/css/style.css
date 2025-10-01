@@ -1,0 +1,290 @@
+/* ===== Theme tokens ===== */
+:root{
+  --primary:#0f6bff;
+  --primary-600:#0c58d0;
+  --accent:#16a34a;
+  --dark:#0b132a;
+  --muted:#64748b;
+  --text:#334155;
+  --bg:#f8fafc;
+  --surface:#ffffff;
+  --border:#e5e7eb;
+  --radius:12px;
+  --shadow:0 8px 24px rgba(2,6,23,0.06);
+}
+
+/* ===== Base ===== */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html, body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  line-height:1.6;
+  display:flex; flex-direction:column; min-height:100vh; /* sticky footer pattern */
+}
+.site-main{flex:1}
+img{max-width:100%;display:block}
+.container{width:min(1120px,92%);margin:0 auto}
+
+/* ===== Global fixed blurred background ===== */
+.site-bg{
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.56) 0%, rgba(255,255,255,.78) 100%),
+    url("../img/nmd_travels_bus.jpg") center/cover no-repeat;
+  filter:blur(8px) brightness(1.03) contrast(1.04) saturate(1.08);
+  transform:scale(1.035);
+}
+
+/* ===== Header (clean) ===== */
+.site-header{
+  position:sticky; top:0; z-index:1000;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:saturate(1.05) blur(6px);
+  border-bottom:1px solid var(--border);
+}
+.header-wrap{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:12px 0;
+}
+.brand-wrap{display:flex; align-items:center}
+.logo img{height:52px; width:auto; border-radius:8px}
+.brand-text{display:flex; flex-direction:column; margin-left:12px}
+.brand-name{font-size:20px; font-weight:800; letter-spacing:.2px; color:var(--dark); line-height:1.1}
+.brand-addr{font-size:12px; color:#5b6b85; line-height:1.2}
+
+.nav{display:flex; gap:12px; flex-wrap:wrap; margin:0 8px}
+.nav a{
+  color:var(--dark); text-decoration:none; font-weight:600;
+  padding:8px 10px; border-radius:8px;
+}
+.nav a:hover{background:#eef2ff; color:var(--primary)}
+
+.btn{
+  display:inline-block; background:var(--primary); color:#fff;
+  padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:700;
+  box-shadow:var(--shadow); transition:.2s transform,.2s background;
+}
+.btn:hover{background:var(--primary-600); transform:translateY(-1px)}
+.btn.small{padding:8px 12px}
+.btn.outline{
+  color:var(--primary); background:transparent; border:1.5px solid var(--primary);
+}
+.btn.outline:hover{background:#eef2ff}
+
+/* ===== Hero ===== */
+.hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  padding:68px 0 32px;
+  background:
+    radial-gradient(1200px 400px at 80% -150px, rgba(15,107,255,.12), transparent 60%),
+    linear-gradient(180deg, rgba(15,107,255,.05), rgba(255,255,255,0));
+}
+.hero .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center}
+.hero h1{margin:0 0 12px;font-size:44px;color:var(--dark);line-height:1.15}
+.hero p{margin:0 0 18px;color:var(--muted);font-size:18px}
+
+/* ===== Sections, cards, forms ===== */
+.section{padding:44px 0}
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin:24px 0;
+  justify-items:center;   /* center the cards in their columns */
+  align-items:stretch;
+}
+.card{
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+  backdrop-filter:saturate(1.05) blur(2px);
+    text-align:center;      /* center headings and paragraphs */
+  width:100%;
+}
+.card h3{margin:6px 0 8px}
+.card p{margin:0}
+
+
+.form-card .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-weight:600;color:var(--dark);margin-top:6px}
+input, textarea, select{
+  width:100%;padding:12px 12px;margin-top:6px;border:1px solid var(--border);
+  border-radius:10px;background:#fff;font:inherit;outline:none;
+}
+input:focus, textarea:focus, select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,107,255,.15)}
+.help{color:var(--muted);font-size:13px;margin-top:6px}
+
+/* ===== Footer ===== */
+.site-footer{
+  border-top:1px solid var(--border); background:rgba(255,255,255,.96);
+  backdrop-filter:saturate(1.05) blur(4px);
+  padding:26px 0; margin-top:40px;
+}
+.footer-top{
+  display:grid; gap:20px; grid-template-columns:2fr 1fr 1fr 1fr;
+}
+.footer-top h4{margin:0 0 8px}
+.footer-top p{margin:0 0 8px}
+.footer-top ul{list-style:none;margin:0;padding:0}
+.footer-top li{margin:6px 0}
+.footer-top a{text-decoration:none;color:var(--text)}
+.footer-top a:hover{color:var(--primary)}
+.socials a{margin-right:10px;color:var(--primary);text-decoration:none}
+.footer-bottom{
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--border); padding-top:14px; margin-top:14px;
+}
+.small-links a{margin-left:12px;color:#64748b;text-decoration:none}
+.small-links a:hover{color:var(--primary)}
+
+/* ===== Badges and grids ===== */
+.badge{display:inline-block;background:#eef2ff;color:var(--primary);font-weight:700;
+  padding:6px 10px;border-radius:999px;font-size:12px;letter-spacing:.3px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  .header-wrap{flex-wrap:wrap;gap:8px}
+  .brand-wrap{width:100%}
+  .nav{order:3;width:100%;justify-content:center}
+  .btn.small{order:2}
+  .hero .grid{grid-template-columns:1fr}
+  .card-grid,.grid-3{grid-template-columns:1fr}
+  .form-card .row{grid-template-columns:1fr}
+  .hero{padding:44px 0 16px}
+  .hero h1{font-size:36px}
+  .footer-top{grid-template-columns:1fr 1fr}
+}
+@media (max-width: 520px){
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:8px}
+  .brand-addr{max-width:100%}
+}
+/* Legendary header: big left logo, centered nav, right utilities */
+.site-header.pro{
+  position:sticky; top:0; z-index:1000;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:saturate(1.05) blur(6px);
+  border-bottom:1px solid var(--border);
+}
+.header-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto; /* left | center | right */
+  align-items:center;
+  gap:18px;
+  padding:12px 0;
+  min-height:82px;
+}
+
+/* Left */
+.header-left{display:flex; align-items:center; gap:14px}
+.logo img{height:72px; width:auto; display:block; border-radius:10px} /* BIG, visible */
+.brand{display:flex; flex-direction:column; justify-content:center}
+.brand-name{font-size:22px; font-weight:800; letter-spacing:.2px; color:#0b132a; line-height:1.1; margin-bottom:2px}
+.brand-addr{font-size:12px; color:#5b6b85; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:520px}
+
+/* Center nav */
+.nav{display:flex; justify-content:center; gap:18px}
+.nav a{
+  color:#0b132a; text-decoration:none; font-weight:700;
+  padding:8px 10px; border-radius:8px; white-space:nowrap; line-height:1;
+}
+.nav a:hover{background:#eef2ff; color:#0f6bff}
+
+/* Right utilities */
+.header-right{display:flex; align-items:center; gap:14px}
+.header-right .phone{color:#0f6bff; text-decoration:none; font-weight:700}
+.btn.cta{padding:10px 16px; border-radius:10px; background:#0f6bff; color:#fff; text-decoration:none; font-weight:800}
+.btn.cta:hover{background:#0c58d0}
+
+/* Responsive */
+@media (max-width: 1100px){
+  .brand-addr{display:none} /* save space on medium screens */
+}
+@media (max-width: 900px){
+  .header-row{
+    grid-template-columns:1fr; gap:10px; min-height:auto; padding:10px 0;
+  }
+  .nav{justify-content:flex-start; flex-wrap:wrap; gap:12px}
+  .brand-addr{display:block; max-width:100%}
+}
+/* Typography scales */
+.h1{font-size:42px; font-weight:900; color:var(--dark); line-height:1.15; margin:8px 0 10px}
+.h2{font-size:28px; font-weight:800; color:var(--dark); margin:0 0 8px}
+.h3{font-size:18px; font-weight:800; color:var(--dark); margin:6px 0 8px}
+.lead{font-size:18px; color:var(--muted); margin:0 0 18px}
+.muted{color:var(--muted); margin:0}
+
+/* Hero layout */
+.hero--home .hero__grid{display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:center}
+.hero__img{width:100%; border-radius:12px}
+
+/* Section head and actions */
+.section-head{margin-bottom:10px}
+.actions{margin-top:12px}
+.actions.between{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+
+/* Utility row patterns */
+.row-between{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+.chips{display:flex; gap:12px; align-items:center}
+
+/* Review cards */
+.review{display:flex; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow)}
+.avatar{width:44px; height:44px; border-radius:999px; object-fit:cover}
+.review__head{display:flex; align-items:center; gap:6px; margin-bottom:4px}
+.stars{color:#f59e0b}
+
+/* Responsive adjustments */
+@media (max-width: 900px){
+  .hero--home .hero__grid{grid-template-columns:1fr}
+  .h1{font-size:34px}
+}
+.section .card-grid{
+  width:100%;
+  max-width:1120px;     /* same as .container width cap */
+  margin:24px auto;     /* center the whole grid block */
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:20px;
+}
+
+
+
+@media (max-width: 900px){
+  .section .card-grid{
+    grid-template-columns:1fr;
+    max-width:680px;    /* comfortable reading width when stacked */
+  }
+}
+.section .container{display:block; margin:0 auto}
+/* Horizontally center the 3-card row */
+.section .card-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:20px;
+
+  /* key lines to center horizontally */
+  max-width:1120px;     /* same width cap as .container */
+  margin-left:auto;
+  margin-right:auto;
+  justify-items:stretch; /* cards fill their columns */
+}
+
+/* Optional: if the grid sits inside .container with padding, allow full width then center */
+.section .container{padding-left:0; padding-right:0}
+
+/* Mobile: single column centered */
+@media (max-width: 900px){
+  .section .card-grid{
+    grid-template-columns:1fr;
+    max-width:680px;    /* nice reading width */
+  }
+}
+.section .card-grid-wrap{width:100%}
+.section .card-grid-wrap .card-grid{margin-left:auto; margin-right:auto}
