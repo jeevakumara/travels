@@ -1,7 +1,7 @@
 <?php
 // Database connection using PDO (XAMPP defaults)
 $host = '127.0.0.1';
-$db   = 'travel_db';
+$db   = 'travels';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';

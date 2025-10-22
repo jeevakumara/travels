@@ -1,0 +1,42 @@
+CREATE DATABASE IF NOT EXISTS travels
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE travels;
+CREATE TABLE IF NOT EXISTS services (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  summary TEXT,
+  price DECIMAL(10,2) DEFAULT NULL,
+  currency VARCHAR(10) DEFAULT 'INR',
+  duration_label VARCHAR(100) DEFAULT NULL,
+  is_active TINYINT(1) DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  image VARCHAR(255) DEFAULT NULL,
+  INDEX idx_is_active (is_active)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS bookings (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  full_name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  package_name VARCHAR(255) NOT NULL,
+  travel_date DATE NOT NULL,
+  adults INT DEFAULT 1,
+  notes TEXT,
+  status ENUM('Pending', 'Confirmed', 'Cancelled') DEFAULT 'Pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_status (status)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS messages (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(20) DEFAULT NULL,
+  subject VARCHAR(255) DEFAULT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email)
+) ENGINE=InnoDB;

@@ -7,8 +7,7 @@ include __DIR__ . '/partials/header.php';
   <div class="container">
     <h1>Booking</h1>
     <p>Fill in details and preferred package. We’ll confirm availability and price.</p>
-   <form method="POST" action="<?php echo $basePath; ?>/php/handle_booking.php" class="card form-card">
-
+     <form method="POST" action="<?php echo $basePath; ?>/php/handle_booking.php" class="card form-card">
       <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($token); ?>">
       <label>Full Name
         <input type="text" name="full_name" required style="width:100%; padding:10px; margin:6px 0;">
