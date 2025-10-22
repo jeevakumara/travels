@@ -17,11 +17,11 @@ include __DIR__ . '/partials/header.php';
         </label>
 
         <label>Email
-          <input type="email" name="email" required>
+          <input type="email" name="email" required placeholder="abc@gmail.com">
         </label>
 
         <label>Phone
-          <input type="tel" name="phone" placeholder="+91 9XXXXXXXXX">
+          <input type="tel" name="phone" required placeholder="+91 9XXXXXXXXX">
         </label>
 
         <label>Message
@@ -33,8 +33,7 @@ include __DIR__ . '/partials/header.php';
 
       <div style="margin-top:16px;">
         <p><strong>Address:</strong> 65/6, Chella Pillayar Koil St, Padupakkam, Royapettah, Chennai, Tamil Nadu 600014</p>
-        <p><strong>Phone:</strong> +91 99999 99999</p>
-        <p class="muted" style="margin-top:6px;">Chennai landline/STD code is 044; mobiles use +91 followed by 10 digits.</p>
+        <p><strong>Phone:</strong> +91 9940671829/p>
 
         <div style="margin-top:10px;">
           <!-- Public Google Maps embed (no API key needed) pointing to NMD Travels in Royapettah -->
@@ -48,8 +47,8 @@ include __DIR__ . '/partials/header.php';
 
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
           <a class="btn outline" href="https://www.justdial.com/Chennai/Nmd-Travels-Near-Zam-Bazaar-Royapettah/044P1221473572G7U2J6_BZDET" target="_blank" rel="noopener">Justdial Listing</a>
-          <a class="btn outline" href="tel:+919999999999">Call Now</a>
-          <a class="btn outline" href="mailto:info@nmdtravels.in">Email Us</a>
+          <a class="btn outline" href="tel:+91 9940671829">Call Now</a>
+          <a class="btn outline" href="mailto:nmdtravelss@gmail.com">Email Us</a>
         </div>
       </div>
     </div>

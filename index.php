@@ -132,14 +132,29 @@
 <!-- CTA banner -->
 <section class="section">
   <div class="container">
-    <div class="card row-between">
+    <div class="card row-between" style="padding:25px; background:#f9fafb; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); align-items:center;">
+      
       <div>
-        <h3 class="h3">Ready to book your ride?</h3>
-        <p class="muted">Tell us your date and destination; availability is confirmed promptly.</p>
+        <h3 class="h3" style="margin:0 0 8px; color:#1e3c72;">Ready to book your ride?</h3>
+        <p class="muted" style="margin:0; font-size:15px; color:#555;">Tell us your date and destination; availability is confirmed promptly.</p>
       </div>
-      <a class="btn" href="<?php echo $basePath; ?>/booking.php">Book Now</a>
+      
+      <a href="<?php echo $basePath; ?>/booking.php" 
+         style="padding:12px 28px; background:linear-gradient(90deg,#1e3c72,#3a5ca8); color:#fff; font-weight:600; font-size:16px; border-radius:8px; text-decoration:none; box-shadow:0 4px 8px rgba(0,0,0,0.15); transition:all 0.3s; display:inline-block;">
+         Book Now
+      </a>
+      
     </div>
   </div>
 </section>
+
+<style>
+  .card a:hover {
+    background:linear-gradient(90deg,#16335c,#2a4a7a);
+    transform:translateY(-2px);
+    box-shadow:0 6px 12px rgba(0,0,0,0.2);
+  }
+</style>
+
 
 <?php include __DIR__ . '/partials/footer.php'; ?>
