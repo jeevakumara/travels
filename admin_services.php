@@ -139,12 +139,14 @@ $services = $pdo->query("SELECT * FROM services ORDER BY id DESC")->fetchAll();
         body{font-family:sans-serif;}
         .container{max-width:900px;margin:auto;padding:20px;}
         .card{border:1px solid #ddd;padding:15px;margin-bottom:15px;border-radius:8px;}
+        .table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
         table{width:100%;border-collapse:collapse;}
-        th,td{padding:8px;border-bottom:1px solid #ccc;text-align:left;}
+        th,td{padding:8px;border-bottom:1px solid #ccc;text-align:left;white-space:nowrap;}
         input,textarea,select{width:100%;padding:8px;margin:4px 0;}
         .btn{padding:8px 12px;margin-top:6px;display:inline-block;background:#007bff;color:#fff;text-decoration:none;border:none;border-radius:4px;cursor:pointer;}
         .btn-danger{background:#dc3545;}
         .thumb{width:80px;height:60px;object-fit:cover;border-radius:4px;border:1px solid #ccc;}
+        @media(max-width:768px){.container{padding:10px;}th,td{padding:6px;font-size:14px;}}
     </style>
 </head>
 <body>
@@ -184,6 +186,7 @@ $services = $pdo->query("SELECT * FROM services ORDER BY id DESC")->fetchAll();
         <?php if(!$services): ?>
             <p>No services added yet.</p>
         <?php else: ?>
+            <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -227,6 +230,7 @@ $services = $pdo->query("SELECT * FROM services ORDER BY id DESC")->fetchAll();
                 <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         <?php endif; ?>
     </div>
 </div>

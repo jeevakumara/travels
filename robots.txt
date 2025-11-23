@@ -1,0 +1,15 @@
+# NMD Travels - Robots.txt
+# Allow search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow sensitive directories
+Disallow: /php/
+Disallow: /sql/
+Disallow: /admin.php
+Disallow: /admin_services.php
+Disallow: /.git/
+
+# Sitemap location (update with your domain)
+Sitemap: https://yourdomain.com/sitemap.xml

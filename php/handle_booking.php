@@ -2,12 +2,19 @@
 require __DIR__ . '/config.php';
 require __DIR__ . '/csrf.php';
 require __DIR__ . '/rate_limit.php';
+require __DIR__ . '/helpers.php';
+
+// Determine base path
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$basePath = str_replace('/php', '', $basePath);
 
 if (!isset($_POST['csrf']) || !csrf_verify($_POST['csrf'])) {
-  exit('Invalid request.');
+  http_response_code(403);
+  exit('Invalid request. Please refresh the page and try again.');
 }
 if (!rate_limit('booking', 60)) {
-  exit('Please wait before submitting again.');
+  http_response_code(429);
+  exit('Please wait 60 seconds before submitting again.');
 }
 
 function required($key) {
@@ -15,7 +22,8 @@ function required($key) {
 }
 
 if (!required('full_name') || !required('email') || !required('phone') || !required('package_name') || !required('travel_date') || !required('adults')) {
-  exit('Missing required fields.');
+  http_response_code(400);
+  exit('Missing required fields. Please fill all mandatory fields.');
 }
 
 $full_name    = trim($_POST['full_name']);
@@ -26,8 +34,18 @@ $travel_date  = $_POST['travel_date'];
 $adults       = (int)$_POST['adults'];
 $notes        = isset($_POST['notes']) ? trim($_POST['notes']) : null;
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { exit('Invalid email.'); }
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $travel_date)) { exit('Invalid date.'); }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { 
+  http_response_code(400);
+  exit('Invalid email address format.'); 
+}
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $travel_date)) { 
+  http_response_code(400);
+  exit('Invalid date format.'); 
+}
+if ($adults < 1 || $adults > 100) {
+  http_response_code(400);
+  exit('Number of adults must be between 1 and 100.');
+}
 
 // Normalize and limit lengths to match schema
 $full_name    = mb_substr($full_name, 0, 120);
@@ -52,8 +70,11 @@ try {
     ':status'       => 'new'
   ]);
 } catch (Throwable $e) {
-  exit('Booking save failed: ' . $e->getMessage());
+  log_error('Booking save failed', ['error' => $e->getMessage(), 'data' => $_POST]);
+  http_response_code(500);
+  exit('Unable to save booking. Please try again or contact us directly.');
 }
 
-header('Location: /travel-site/thank-you.php');
+// Success - redirect to thank you page
+header('Location: ' . $basePath . '/thank-you.php');
 exit;

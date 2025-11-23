@@ -240,7 +240,8 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
 .card h4{margin:0;color:var(--brand)}
 .stat-num{font-size:26px;font-weight:700;margin-top:8px}
 .section{margin-top:24px}
-.table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+.table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+.table{width:100%;border-collapse:collapse;background:#fff}
 .table thead th{background:#f8fafc;color:var(--brand);padding:12px;border-bottom:1px solid #eef2f7;text-align:left;font-weight:600}
 .table tbody td{padding:12px;border-bottom:1px solid #f1f5f9}
 .table tbody tr:hover{background:#fbfdff}
@@ -336,8 +337,8 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
     <!-- Bookings Table -->
     <section id="bookings" class="section">
       <h3>Recent Bookings</h3>
-      <div class="table">
-        <table>
+      <div class="table-responsive">
+        <table class="table">
           <thead>
             <tr><th>Name</th><th>Package</th><th>Travel Date</th><th>Adults</th><th>When</th><th>Status</th><th>Action</th></tr>
           </thead>
@@ -416,8 +417,8 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
         <h3>Services / Packages</h3>
         <div><a class="btn" href="admin_services.php?key=<?php echo htmlspecialchars($secret); ?>">+ Add Service</a></div>
       </div>
-      <div class="table" style="margin-top:12px;">
-        <table>
+      <div class="table-responsive" style="margin-top:12px;">
+        <table class="table">
           <thead><tr><th>Title</th><th>Price</th><th>Duration</th><th>Status</th></tr></thead>
           <tbody>
             <?php if (count($services)===0): ?>

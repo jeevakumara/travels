@@ -2,18 +2,26 @@
 require __DIR__ . '/config.php';
 require __DIR__ . '/csrf.php';
 require __DIR__ . '/rate_limit.php';
+require __DIR__ . '/helpers.php';
+
+// Determine base path
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$basePath = str_replace('/php', '', $basePath);
 
 if (!isset($_POST['csrf']) || !csrf_verify($_POST['csrf'])) {
-  exit('Invalid request.');
+  http_response_code(403);
+  exit('Invalid request. Please refresh the page and try again.');
 }
 if (!rate_limit('contact', 60)) {
-  exit('Please wait before submitting again.');
+  http_response_code(429);
+  exit('Please wait 60 seconds before submitting again.');
 }
 
 function required($key) { return isset($_POST[$key]) && trim($_POST[$key]) !== ''; }
 
 if (!required('name') || !required('email') || !required('message')) {
-  exit('Missing required fields.');
+  http_response_code(400);
+  exit('Missing required fields. Please fill all mandatory fields.');
 }
 
 $name    = trim($_POST['name']);
@@ -22,7 +30,10 @@ $phone   = isset($_POST['phone']) ? trim($_POST['phone']) : null;
 $subject = isset($_POST['subject']) ? trim($_POST['subject']) : null;
 $message = trim($_POST['message']);
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { exit('Invalid email.'); }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { 
+  http_response_code(400);
+  exit('Invalid email address format.'); 
+}
 
 // Normalize and limit lengths to match schema
 $name    = mb_substr($name, 0, 120);
@@ -44,8 +55,11 @@ try {
     ':message' => $message
   ]);
 } catch (Throwable $e) {
-  exit('Message save failed: ' . $e->getMessage());
+  log_error('Contact message save failed', ['error' => $e->getMessage(), 'data' => $_POST]);
+  http_response_code(500);
+  exit('Unable to send message. Please try again or contact us directly.');
 }
 
-header('Location: /travel-site/thank-you.php');
+// Success - redirect to thank you page
+header('Location: ' . $basePath . '/thank-you.php');
 exit;
