@@ -1,0 +1,21 @@
+# Security
+db_credentials.php
+.env
+.env.local
+
+# Dependencies
+vendor/
+node_modules/
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+error_log
+*.log

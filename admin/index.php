@@ -1,11 +1,18 @@
 <?php
-// admin.php - Single-file Legendary Admin Dashboard (real DB-backed)
-// Requirements:
-// - php/config.php must create a PDO instance in $pdo
-// - Protect this page with ?key=local-admin (as already used)
-// - Optional: PHPMailer for reliable SMTP (composer require phpmailer/phpmailer)
+require_once __DIR__ . '/../config.php';
 
-require __DIR__ . '/php/config.php';
+// Security Check: Enforce Admin Session
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: ' . $basePath . '/admin/login.php');
+    exit;
+}
+
+// Logout Action
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: ' . $basePath . '/admin/login.php');
+    exit;
+}
 
 // ----------------- CONFIG (fill if you want PHPMailer SMTP) -----------------
 $smtp = [
@@ -20,89 +27,88 @@ $smtp = [
 ];
 // ---------------------------------------------------------------------------
 
-$secret = $_GET['key'] ?? '';
-if ($secret !== 'local-admin') {
-  echo "<h2 style='text-align:center;margin-top:100px;'>Access Denied</h2>";
-  exit;
-}
-
 // ----- Handle POST actions: send_mail, mark_responded, search handled via GET -----
 $messages_feedback = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // Send mail action
-  if (isset($_POST['action']) && $_POST['action'] === 'send_mail') {
-    $to = filter_var($_POST['to'] ?? '', FILTER_VALIDATE_EMAIL);
-    $subject = trim($_POST['subject'] ?? '');
-    $body = trim($_POST['body'] ?? '');
-    $message_id = intval($_POST['message_id'] ?? 0);
+  // CSRF Check (using the unified token)
+  if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+      $messages_feedback = 'Invalid CSRF token.';
+  } else {
+      // Send mail action
+      if (isset($_POST['action']) && $_POST['action'] === 'send_mail') {
+        $to = filter_var($_POST['to'] ?? '', FILTER_VALIDATE_EMAIL);
+        $subject = trim($_POST['subject'] ?? '');
+        $body = trim($_POST['body'] ?? '');
+        $message_id = intval($_POST['message_id'] ?? 0);
 
-    if ($to && $subject && $body) {
-      // Try PHPMailer if configured and installed
-      $sent = false;
-      if ($smtp['enabled'] && file_exists(__DIR__ . '/vendor/autoload.php')) {
-        require __DIR__ . '/vendor/autoload.php';
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-        try {
-          $mail->isSMTP();
-          $mail->Host = $smtp['host'];
-          $mail->SMTPAuth = true;
-          $mail->Username = $smtp['username'];
-          $mail->Password = $smtp['password'];
-          $mail->SMTPSecure = $smtp['secure'];
-          $mail->Port = $smtp['port'];
-          $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-          $mail->addAddress($to);
-          $mail->Subject = $subject;
-          $mail->Body = $body;
-          $mail->isHTML(false);
-          $mail->send();
-          $sent = true;
-        } catch (Exception $e) {
-          $messages_feedback = 'Mailer error: ' . htmlspecialchars($mail->ErrorInfo);
-        }
-      } else {
-        // Fallback to PHP mail()
-        $headers = "From: " . ($smtp['from_email'] ?? 'noreply@nmdtravels.com') . "\r\n";
-        $headers .= "Reply-To: " . ($smtp['from_email'] ?? 'noreply@nmdtravels.com') . "\r\n";
-        if (@mail($to, $subject, $body, $headers)) {
-          $sent = true;
+        if ($to && $subject && $body) {
+          // Try PHPMailer if configured and installed
+          $sent = false;
+          if ($smtp['enabled'] && file_exists(__DIR__ . '/../vendor/autoload.php')) {
+            require __DIR__ . '/../vendor/autoload.php';
+            $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+            try {
+              $mail->isSMTP();
+              $mail->Host = $smtp['host'];
+              $mail->SMTPAuth = true;
+              $mail->Username = $smtp['username'];
+              $mail->Password = $smtp['password'];
+              $mail->SMTPSecure = $smtp['secure'];
+              $mail->Port = $smtp['port'];
+              $mail->setFrom($smtp['from_email'], $smtp['from_name']);
+              $mail->addAddress($to);
+              $mail->Subject = $subject;
+              $mail->Body = $body;
+              $mail->isHTML(false);
+              $mail->send();
+              $sent = true;
+            } catch (Exception $e) {
+              $messages_feedback = 'Mailer error: ' . htmlspecialchars($mail->ErrorInfo);
+            }
+          } else {
+            // Fallback to PHP mail()
+            $headers = "From: " . ($smtp['from_email'] ?? 'noreply@nmdtravels.com') . "\r\n";
+            $headers .= "Reply-To: " . ($smtp['from_email'] ?? 'noreply@nmdtravels.com') . "\r\n";
+            if (@mail($to, $subject, $body, $headers)) {
+              $sent = true;
+            } else {
+              $messages_feedback = 'Failed to send mail via PHP mail().';
+            }
+          }
+
+          if ($sent) {
+            // mark message responded in DB (if message id provided)
+            if ($message_id) {
+              $stmt = $pdo->prepare("UPDATE messages SET responded = 1, responded_at = NOW() WHERE id = ?");
+              $stmt->execute([$message_id]);
+            }
+            $messages_feedback = 'Mail sent and message marked responded.';
+          }
         } else {
-          $messages_feedback = 'Failed to send mail via PHP mail().';
+          $messages_feedback = 'Invalid mail data (check recipient, subject, message).';
         }
       }
 
-      if ($sent) {
-        // mark message responded in DB (if message id provided)
+      // Mark message responded action (no mail)
+      if (isset($_POST['action']) && $_POST['action'] === 'mark_responded') {
+        $message_id = intval($_POST['message_id'] ?? 0);
         if ($message_id) {
           $stmt = $pdo->prepare("UPDATE messages SET responded = 1, responded_at = NOW() WHERE id = ?");
           $stmt->execute([$message_id]);
+          $messages_feedback = 'Message marked as responded.';
         }
-        $messages_feedback = 'Mail sent and message marked responded.';
       }
-    } else {
-      $messages_feedback = 'Invalid mail data (check recipient, subject, message).';
-    }
-  }
 
-  // Mark message responded action (no mail)
-  if (isset($_POST['action']) && $_POST['action'] === 'mark_responded') {
-    $message_id = intval($_POST['message_id'] ?? 0);
-    if ($message_id) {
-      $stmt = $pdo->prepare("UPDATE messages SET responded = 1, responded_at = NOW() WHERE id = ?");
-      $stmt->execute([$message_id]);
-      $messages_feedback = 'Message marked as responded.';
-    }
-  }
-
-  // Update booking status (optional feature)
-  if (isset($_POST['action']) && $_POST['action'] === 'update_booking_status') {
-    $booking_id = intval($_POST['booking_id'] ?? 0);
-    $new_status = trim($_POST['new_status'] ?? '');
-    if ($booking_id && in_array($new_status, ['Pending','Confirmed','Cancelled','Completed'])) {
-      $stmt = $pdo->prepare("UPDATE bookings SET status = ? WHERE id = ?");
-      $stmt->execute([$new_status, $booking_id]);
-      $messages_feedback = 'Booking status updated.';
-    }
+      // Update booking status (optional feature)
+      if (isset($_POST['action']) && $_POST['action'] === 'update_booking_status') {
+        $booking_id = intval($_POST['booking_id'] ?? 0);
+        $new_status = trim($_POST['new_status'] ?? '');
+        if ($booking_id && in_array($new_status, ['Pending','Confirmed','Cancelled','Completed'])) {
+          $stmt = $pdo->prepare("UPDATE bookings SET status = ? WHERE id = ?");
+          $stmt->execute([$new_status, $booking_id]);
+          $messages_feedback = 'Booking status updated.';
+        }
+      }
   }
 }
 
@@ -213,25 +219,25 @@ $topPackagesCounts = json_encode(array_column($topPackages, 'c'));
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NMD Travels — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo $basePath; ?>/assets/css/site.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-/* --- Clean Admin Styles --- */
+/* --- Admin Specific Styles --- */
 :root{
   --brand:#1e3c72;
   --accent:#3a5ca8;
   --muted:#6b7280;
   --bg:#f4f6f9;
 }
-*{box-sizing:border-box}
-body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
+body{background:var(--bg);}
 .admin-wrap{display:flex;min-height:100vh;}
-.sidebar{width:240px;background:var(--brand);color:#fff;padding:22px;position:fixed;height:100vh;display:flex;flex-direction:column;justify-content:space-between;}
+.sidebar{width:240px;background:var(--brand);color:#fff;padding:22px;position:fixed;height:100vh;display:flex;flex-direction:column;justify-content:space-between; z-index: 100;}
 .logo{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px}
 .nav{margin-top:12px}
 .nav a{display:block;color:#fff;text-decoration:none;padding:10px 12px;border-radius:8px;margin:6px 0;font-weight:500}
 .nav a.active, .nav a:hover{background:rgba(255,255,255,0.08)}
 .footer-note{font-size:12px;text-align:center;opacity:0.85}
-.main{margin-left:260px;padding:24px;flex:1}
+.main{margin-left:260px;padding:24px;flex:1; width: calc(100% - 260px);}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
 .topbar .search{width:420px;max-width:60%}
 .topbar input[type="search"]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e6e9ee}
@@ -245,8 +251,6 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
 .table thead th{background:#f8fafc;color:var(--brand);padding:12px;border-bottom:1px solid #eef2f7;text-align:left;font-weight:600}
 .table tbody td{padding:12px;border-bottom:1px solid #f1f5f9}
 .table tbody tr:hover{background:#fbfdff}
-.btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--brand);color:#fff;text-decoration:none}
-.btn.outline{background:transparent;color:var(--brand);border:1px solid #e6eefb}
 .status{padding:6px 8px;border-radius:8px;font-weight:600;font-size:13px}
 .status.pending{background:#fff4e5;color:#92400e}
 .status.confirmed{background:#e6ffef;color:#065f46}
@@ -264,7 +268,7 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
 @media(max-width:900px){
   .topbar .search{max-width:100%}
   .sidebar{display:none}
-  .main{margin-left:0;padding:16px}
+  .main{margin-left:0;padding:16px; width: 100%;}
 }
 .feedback{margin-top:10px;color:green;font-weight:600}
 </style>
@@ -278,8 +282,9 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
         <a href="#overview" class="active">Dashboard</a>
         <a href="#bookings">Bookings</a>
         <a href="#messages">Messages</a>
-        <a href="#services">Services</a>
+        <a href="services.php">Services</a>
         <a href="#analytics">Analytics</a>
+        <a href="?logout=true" style="margin-top: 20px; background: rgba(255,0,0,0.1);">Logout</a>
       </nav>
     </div>
     <div class="footer-note">© <?php echo date('Y'); ?> NMD Travels</div>
@@ -294,7 +299,6 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
 
       <div class="search">
         <form method="get" action="">
-          <input type="hidden" name="key" value="<?php echo htmlspecialchars($secret); ?>">
           <input type="search" name="q" placeholder="Search bookings, messages, services..." value="<?php echo htmlspecialchars($searchQ); ?>">
         </form>
       </div>
@@ -355,7 +359,7 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
                 <td><span class="status <?php echo strtolower($b['status'] ?? 'pending'); ?>"><?php echo htmlspecialchars($b['status'] ?? 'Pending'); ?></span></td>
                 <td>
                   <form method="post" style="display:inline">
-                    <input type="hidden" name="key" value="<?php echo htmlspecialchars($secret); ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="action" value="update_booking_status">
                     <input type="hidden" name="booking_id" value="<?php echo intval($b['id']); ?>">
                     <select name="new_status" style="padding:6px;border-radius:6px;border:1px solid #e6e9ee">
@@ -391,7 +395,7 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
               <div style="margin-top:8px">
                 <?php if (empty($m['responded']) || $m['responded']==0): ?>
                   <form method="post" style="display:inline">
-                    <input type="hidden" name="key" value="<?php echo htmlspecialchars($secret); ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="action" value="mark_responded">
                     <input type="hidden" name="message_id" value="<?php echo intval($m['id']); ?>">
                     <button class="btn outline" type="submit">Mark Responded</button>
@@ -410,18 +414,6 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
         <div class="feedback"><?php echo htmlspecialchars($messages_feedback); ?></div>
       <?php endif; ?>
     </section>
-
-    <!-- Services -->
-    <section id="services" class="section">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <h3>Services / Packages</h3>
-        <div><a class="btn" href="admin_services.php?key=<?php echo htmlspecialchars($secret); ?>">+ Add Service</a></div>
-      </div>
-      <div class="table-responsive" style="margin-top:12px;">
-        <table class="table">
-          <thead><tr><th>Title</th><th>Price</th><th>Duration</th><th>Status</th></tr></thead>
-          <tbody>
-            <?php if (count($services)===0): ?>
               <tr><td colspan="4" class="kv">No services found.</td></tr>
             <?php else: foreach ($services as $s): ?>
               <tr>
@@ -469,7 +461,7 @@ body{font-family:'Poppins',sans-serif;margin:0;background:var(--bg);color:#222;}
       <button onclick="closeReplyModal()" class="btn outline">Close</button>
     </div>
     <form method="post" onsubmit="return submitReplyForm(this)">
-      <input type="hidden" name="key" value="<?php echo htmlspecialchars($secret); ?>">
+      <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
       <input type="hidden" name="action" value="send_mail">
       <input type="hidden" id="msg_id" name="message_id" value="">
       <div class="form-row">

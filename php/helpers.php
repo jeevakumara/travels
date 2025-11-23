@@ -33,7 +33,9 @@ function sanitize_string($input, $maxLength = 255) {
 
 // Redirect with message
 function redirect_with_message($url, $message, $type = 'success') {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     $_SESSION['flash_message'] = $message;
     $_SESSION['flash_type'] = $type;
     header("Location: $url");
