@@ -11,7 +11,7 @@
 Options -Indexes
 
 # Protect Sensitive Files
-<FilesMatch "^(config\.php|composer\.json|composer\.lock|\.env|\.git)">
+<FilesMatch "^(config\.php|db_credentials\.php|composer\.json|composer\.lock|\.env|\.git)">
     Order allow,deny
     Deny from all
 </FilesMatch>
